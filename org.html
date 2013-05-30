@@ -1,0 +1,121 @@
+<?php
+	# settings (globals)
+	include_once "markdown.php";
+	$prjDir = '/Users/max/Documents/org/projects';
+	$indexFilename = "i.md";
+	$ignoreFiles = array(".", "..", ".DS_Store", $indexFilename);
+	$thisfile = "org.html";
+	# Now using split header so the title can be dynamic...
+	# We have _header and _header-2 .html. Uggggly.
+	#$htmlHeaderFilename = "_header.html";
+	$htmlFooterFilename = "_footer.html";
+
+	# vars
+	$prjName = $_GET["prj"];
+	$resName = $_GET["res"];
+
+	chdir("/Users/max/Sites/");
+
+	# TODO(max) If loading resource in future, won't want to always write
+	# html things. Perhaps best to replace echo's with some queueing function
+	# that writes at the end, or at least conditionall write.
+	display_header($prjName, $resName);
+
+	# Display project list
+	# --------------------
+	echo "<div class='span2'>\n";
+	echo "<h2>Projects</h2>\n";
+	echo "<ul>\n";
+	$project_list = getFiles($prjDir);
+	foreach ($project_list as $project) {
+		echo(prjLink($project));
+	}
+	echo "</ul>\n";	
+	echo "</div>\n";
+
+	# Display resource or project
+	echo "<div class='span10'>\n";
+	if ($prjName) {
+		$thisPrjDir = "$prjDir/$prjName";
+		echo "<div class='hero-unit'><h1>${prjName}</h1>";
+		# Display resource in heder if it exists.
+		if ($resName) {
+			echo "<subtitle>${resName}</subtitle>\n";
+		}
+		echo "</div>";
+		
+		if ($resName) {
+			# Display resource (alpha)
+			# ------------------------
+
+			$res_file = file_get_contents("$thisPrjDir/$resName");
+			$res_file_html = Markdown($res_file);
+			echo $res_file_html;
+		} else {
+			# Display single project
+			# ----------------------
+			# index file
+			$index_file = file_get_contents("$thisPrjDir/$indexFilename");
+			$index_file_html = Markdown($index_file);
+			echo($index_file_html);
+
+			# resources?
+			$other_files = getFiles($thisPrjDir);
+			if ($other_files) {
+				echo "<h2>resources</h2>\n";
+				echo "<ul>\n";
+				foreach ($other_files as $resource) {
+					echo(resourceLink($prjName, $resource));
+				}
+				echo "</ul>\n";			
+			}
+		}
+	}
+	echo "</div>\n";
+
+	display_html($htmlFooterFilename);
+
+	function display_header($prjName, $resName) {
+		echo file_get_contents("_header.html");
+		echo "<title>org/";
+		if ($prjName) {
+			echo $prjName;
+		}
+		if ($resName) {
+			echo "/";
+			echo $resName;
+		}
+		echo "</title>\n";
+		echo file_get_contents("_header-2.html");
+	}
+
+	function display_html($filename) {
+		echo file_get_contents("$filename");
+	}
+
+	function getFiles($dirname) {
+		$dirFH = opendir($dirname);
+
+		# http://php.net/manual/en/function.readdir.php
+		while (false !== ($entry = readdir($dirFH))) {
+			if (!in_array($entry, $GLOBALS["ignoreFiles"])) {
+				$dirlist[] = $entry;
+			}
+		}
+
+		closedir($dirFH);
+		return $dirlist;
+	}
+
+	function space() {
+		return "<br /><br />";
+	}
+
+	function prjLink($prjName) {
+		return "<li><a href=\"?prj=${prjName}\">${prjName}</a></li>";
+	}
+
+	function resourceLink($prjName, $resourceName) {
+		return "<li><a href=\"?prj=${prjName}&res=${resourceName}\">${resourceName}</a></li>";
+	}
+?>
