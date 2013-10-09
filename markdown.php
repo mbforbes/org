@@ -659,7 +659,9 @@ class Markdown_Parser {
 		"encodeAmpsAndAngles" =>  40,
 
 		"doItalicsAndBold"    =>  50,
-		"doHardBreaks"        =>  60,
+		# NOTE(max): Had this come first because, well, it wraps better. I think
+		# the HTML tags take up some amount of space and we want to wrap with
+		"doHardBreaks"        =>  -60,
 		);
 
 	function runSpanGamut($text) {
@@ -676,8 +678,14 @@ class Markdown_Parser {
 	
 	function doHardBreaks($text) {
 		# Do hard breaks:
-		return preg_replace_callback('/ {2,}\n/', 
-			array(&$this, '_doHardBreaks_callback'), $text);
+		# Note(MAX): Changed from original regexp: '/ {2,}\n/' because I don't
+		#            want to have to put two or more spaces at the end of a line
+		#            in order to get word wrap on the next (seriuosly, wtf?).
+		#            Also added wordwrap call to avoid having to manually break
+		#            all of my lines (like I was doing...).
+		return preg_replace_callback('/\n/', 
+			array(&$this, '_doHardBreaks_callback'), wordwrap($text, 80));
+
 	}
 	function _doHardBreaks_callback($matches) {
 		return $this->hashPart("<br$this->empty_element_suffix\n");

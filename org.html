@@ -1,9 +1,9 @@
 <?php
 	# settings (globals)
 	include_once "markdown.php";
-	$prjDir = '/Users/max/Documents/org/projects';
-	$indexFilename = "i.md";
-	$ignoreFiles = array(".", "..", ".DS_Store", $indexFilename);
+	$prjDir = '../Google Drive/org/projects';
+	$idxFilename = "i.md";
+	$ignoreFiles = array(".", "..", ".DS_Store", $idxFilename);
 	$thisfile = "org.html";
 	# Now using split header so the title can be dynamic...
 	# We have _header and _header-2 .html. Uggggly.
@@ -49,15 +49,17 @@
 			# ------------------------
 
 			$res_file = file_get_contents("$thisPrjDir/$resName");
+			// $res_file_html = Markdown(smart_wrap($res_file));
 			$res_file_html = Markdown($res_file);
 			echo $res_file_html;
 		} else {
 			# Display single project
 			# ----------------------
-			# index file
-			$index_file = file_get_contents("$thisPrjDir/$indexFilename");
-			$index_file_html = Markdown($index_file);
-			echo($index_file_html);
+			# idx file
+			$idx_file = file_get_contents("$thisPrjDir/$idxFilename");
+			// $idx_file_html = smart_wrap(Markdown($idx_file));
+			$idx_file_html = Markdown($idx_file);
+			echo($idx_file_html);
 
 			# resources?
 			$other_files = getFiles($thisPrjDir);
@@ -74,6 +76,10 @@
 	echo "</div>\n";
 
 	display_html($htmlFooterFilename);
+
+	function smart_wrap($string) {
+		return implode("<br />\n", explode("\n", wordwrap($string, 80)));
+	}
 
 	function display_header($prjName, $resName) {
 		echo file_get_contents("_header.html");
