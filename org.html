@@ -49,7 +49,6 @@
 			# ------------------------
 
 			$res_file = file_get_contents("$thisPrjDir/$resName");
-			// $res_file_html = Markdown(smart_wrap($res_file));
 			$res_file_html = Markdown($res_file);
 			echo $res_file_html;
 		} else {
@@ -57,7 +56,6 @@
 			# ----------------------
 			# idx file
 			$idx_file = file_get_contents("$thisPrjDir/$idxFilename");
-			// $idx_file_html = smart_wrap(Markdown($idx_file));
 			$idx_file_html = Markdown($idx_file);
 			echo($idx_file_html);
 
@@ -76,10 +74,6 @@
 	echo "</div>\n";
 
 	display_html($htmlFooterFilename);
-
-	function smart_wrap($string) {
-		return implode("<br />\n", explode("\n", wordwrap($string, 80)));
-	}
 
 	function display_header($prjName, $resName) {
 		echo file_get_contents("_header.html");
