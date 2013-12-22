@@ -4,6 +4,7 @@
 	$prjDir = '../Google Drive/org/projects';
 	$idxFilename = "i.md";
 	$ignoreFiles = array(".", "..", ".DS_Store", $idxFilename);
+	$supportedResources = array("txt", "md");
 	$thisfile = "org.html";
 	# Now using split header so the title can be dynamic...
 	# We have _header and _header-2 .html. Uggggly.
@@ -47,7 +48,6 @@
 		if ($resName) {
 			# Display resource (alpha)
 			# ------------------------
-
 			$res_file = file_get_contents("$thisPrjDir/$resName");
 			$res_file_html = Markdown($res_file);
 			echo $res_file_html;
@@ -116,6 +116,10 @@
 	}
 
 	function resourceLink($prjName, $resourceName) {
-		return "<li><a href=\"?prj=${prjName}&res=${resourceName}\">${resourceName}</a></li>";
+		if (in_array(pathinfo($resourceName)['extension'], $GLOBALS["supportedResources"])) {
+			return "<li><a href=\"?prj=${prjName}&res=${resourceName}\">${resourceName}</a></li>";
+		} else {
+			return "<li><a href=\"${GLOBALS[prjDir]}/${prjName}/${resourceName}\">${resourceName}</a></li>";
+		}
 	}
 ?>

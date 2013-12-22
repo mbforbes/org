@@ -661,7 +661,7 @@ class Markdown_Parser {
 		"doItalicsAndBold"    =>  50,
 		# NOTE(max): Had this come first because, well, it wraps better. I think
 		# the HTML tags take up some amount of space and we want to wrap with
-		"doHardBreaks"        =>  -60,
+		"doHardBreaks"        =>  35,
 		);
 
 	function runSpanGamut($text) {
@@ -684,7 +684,7 @@ class Markdown_Parser {
 		#            Also added wordwrap call to avoid having to manually break
 		#            all of my lines (like I was doing...).
 		return preg_replace_callback('/\n/', 
-			array(&$this, '_doHardBreaks_callback'), wordwrap($text, 80));
+			array(&$this, '_doHardBreaks_callback'), wordwrap($text, 70));
 
 	}
 	function _doHardBreaks_callback($matches) {
