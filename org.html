@@ -116,10 +116,12 @@
 	}
 
 	function resourceLink($prjName, $resourceName) {
-		if (in_array(pathinfo($resourceName)['extension'], $GLOBALS["supportedResources"])) {
+		$pathInfo = pathinfo($resourceName);
+		if (array_key_exists('extension', $pathInfo) &&
+			in_array($pathInfo['extension'], $GLOBALS["supportedResources"])) {
 			return "<li><a href=\"?prj=${prjName}&res=${resourceName}\">${resourceName}</a></li>";
 		} else {
-			return "<li><a href=\"${GLOBALS[prjDir]}/${prjName}/${resourceName}\">${resourceName}</a></li>";
+			return "<li><a href=\"${GLOBALS["prjDir"]}/${prjName}/${resourceName}\">${resourceName}</a></li>";
 		}
 	}
 ?>
