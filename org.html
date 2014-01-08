@@ -24,7 +24,7 @@
 
 	# Display project list
 	# --------------------
-	echo "<div class='col-xs-2'>\n";
+	echo "<div class='col-xs-3'>\n";
 	echo "<h2>Projects</h2>\n";
 	echo "<ul>\n";
 	$project_list = getFiles($prjDir);
@@ -35,7 +35,7 @@
 	echo "</div>\n";
 
 	# Display resource or project
-	echo "<div class='col-xs-10'>\n";
+	echo "<div class='col-xs-9'>\n";
 	if ($prjName) {
 		$thisPrjDir = "$prjDir/$prjName";
 		echo "<div class='jumbotron'><h1>${prjName}</h1>";
