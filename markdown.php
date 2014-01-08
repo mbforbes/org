@@ -357,11 +357,13 @@ class Markdown_Parser {
 		);
 
 	# Tags that naturally start new lines in HTML (and so should reset the word
-	# wrap counter to 0).
+	# wrap counter to 0). I'm just using the first character for simplicity and
+	# so far there haven't been any cases where it doesn't work.
 	var $wrapStartTags = array(
 		"p", #<p>
 		"l", #<li>
 		"h", #<h*>
+		"b", #<blockquote> and <br />; OK as Markdown doesn't use <b>.
 	 	);
 
 	# Gratefully fround at http://www.php.net/manual/en/function.wordwrap.php;
