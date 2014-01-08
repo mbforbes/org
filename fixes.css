@@ -1,0 +1,18 @@
+/* Yes bootstrap, I want things fully left-aligned because I'm
+   using this on my desktop. */
+.container {
+	width: 100%;
+}
+
+/* Fix spacing for multi-level bullets. We want inner bullets closer
+   to their parents, and farther away from the next level below.*/
+p~ol, p~ul {
+	margin-top: -5px; /* Not right next to, but close */
+	margin-bottom: 10px; /* Get some room on the bottom! */
+}
+
+/* Hoever, with the last fix, bullets that come right after headers are
+   wonky; space them out a bit.*/
+h1~ol, h1~ul, h2~ol, h2~ul, h3~ol, h3~ul, h4~ol, h4~ul, h5~ol, h5~ul, h6~ol, h6~ul {
+	margin-top: 0px; /* Restore the natural space (remove negative). */
+}

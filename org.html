@@ -24,7 +24,7 @@
 
 	# Display project list
 	# --------------------
-	echo "<div class='span2'>\n";
+	echo "<div class='col-xs-2'>\n";
 	echo "<h2>Projects</h2>\n";
 	echo "<ul>\n";
 	$project_list = getFiles($prjDir);
@@ -35,10 +35,10 @@
 	echo "</div>\n";
 
 	# Display resource or project
-	echo "<div class='span10'>\n";
+	echo "<div class='col-xs-10'>\n";
 	if ($prjName) {
 		$thisPrjDir = "$prjDir/$prjName";
-		echo "<div class='hero-unit'><h1>${prjName}</h1>";
+		echo "<div class='jumbotron'><h1>${prjName}</h1>";
 		# Display resource in heder if it exists.
 		if ($resName) {
 			echo "<subtitle>${resName}</subtitle>\n";

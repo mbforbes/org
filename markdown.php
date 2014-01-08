@@ -353,8 +353,110 @@ class Markdown_Parser {
 		"stripLinkDefinitions" => 20,
 		
 		"runBasicBlockGamut"   => 30,
+		"htmlWrap"            => 60, # NOTE(max): Added.
 		);
 
+	# Tags that naturally start new lines in HTML (and so should reset the word
+	# wrap counter to 0).
+	var $wrapStartTags = array(
+		"p", #<p>
+		"l", #<li>
+		"h", #<h*>
+	 	);
+
+	# Gratefully fround at http://www.php.net/manual/en/function.wordwrap.php;
+	# submitted from a user.
+	function htmlWrap($text, $maxLength=70, $char='<br />') {
+    	$count = 0;
+    	$newStr = '';
+    	$openTag = false;
+    	$openEscape = false;
+    	$lenstr = strlen($text);
+    	$lastspace = 0;
+    	$lineidx = 0;
+    	for($i=0; $i<$lenstr; $i++){
+    		$newStr .= $text{$i};
+    		$lineidx++;
+
+    		# Deal with tag opens and closes (builtin).
+    		if($text{$i} == '<'){
+    			// echo "\n[[open tag:" . substr($text, $i, 2) . "]]\n";
+    			// flush();
+    			$openTag = true;
+    			# MAX: Making it smart because <p> tags, e.g., mean that we get
+    			#      to start counting from 0!
+    			if (in_array($text[$i + 1], $this->wrapStartTags)) {
+    				$count = 0;
+    			}
+    			continue;
+    		}
+    		if(($openTag) && ($text{$i} == '>')){
+    			// echo "\n[[close tag: >]]\n";
+    			// flush();
+    			$openTag = false;
+    			continue;
+    		}
+
+    		# Deal with escape (e.g. &theta;, &amp;, etc.). opens and closes.
+    		# I added this.
+    		if($text{$i} == '&') {
+    			$openEscape = true;
+    			continue;
+    		}
+    		if(($openEscape) && ($text{$i} == ';')) {
+    			$openEscape = false;
+    			$count++; # They do take up 1 character width.
+    			continue;
+    		}    		
+
+
+    		if((!$openTag) && (!$openEscape)) {
+    			if($text{$i} == ' '){
+    				if ($count == 0) {
+    					// Rip off the space we just added; don't start lines
+    					// with spaces. This doesn't seem like it should matter
+    					// in HTML but what the hell.
+    					$newStr = substr($newStr,0, -1);
+    					$lineidx--;
+    					continue;
+    				} else {
+    					$lastspace = $lineidx;
+    				}
+    			}
+    			$count++;
+    			if($count >= $maxLength){
+					// NOTE(max): Disabling this case because it looks back
+					//            to try to place a break, but this screws
+					//            up because we sometimes look back into
+					//            HTML tags! This is the "hard break" case
+					//            e.g. for really long words) so we can just
+					//            turn this off and use the case 2 (soft
+					//            breaks) below.    				
+    				// if ($text{$i+1} != ' ' && $lastspace && ($lastspace < $count)) {
+    					// $tmp = ($count - $lastspace)* -1;
+    					// $newStr = substr($newStr,0, $tmp) . $char . substr($newStr,$tmp);
+    					// $count = $tmp * -1;
+    				// } else {
+    				if ($text{$i + 1} == ' ') {
+    					// Just our luck--a space is next.
+    					$newStr .= $char;
+    				} else if ($text{$i} == ' ') {
+    					# Corner math case; we're at a space now.
+    					$newStr = substr($newStr,0, -1) . $char;
+    				} else {
+    					// More likely; break at last space.
+    					$backToSpace = ($lineidx - $lastspace) * -1;
+    					$newStr = substr($newStr, 0, $backToSpace) . $char . substr($newStr, $backToSpace );
+    				}
+    				$count = 0;
+    				$lineidx = 0;
+    				$lastspace = 0;
+    			}
+    		}  
+    	}
+
+    	return $newStr;
+    }    	
 
 	function stripLinkDefinitions($text) {
 	#
@@ -615,7 +717,6 @@ class Markdown_Parser {
 		
 		# Finally form paragraph and restore hashed blocks.
 		$text = $this->formParagraphs($text);
-
 		return $text;
 	}
 	
@@ -661,7 +762,7 @@ class Markdown_Parser {
 		"doItalicsAndBold"    =>  50,
 		# NOTE(max): Had this come first because, well, it wraps better. I think
 		# the HTML tags take up some amount of space and we want to wrap with
-		"doHardBreaks"        =>  35,
+		"doHardBreaks"        =>  45,
 		);
 
 	function runSpanGamut($text) {
@@ -675,22 +776,25 @@ class Markdown_Parser {
 		return $text;
 	}
 	
-	
 	function doHardBreaks($text) {
 		# Do hard breaks:
-		# Note(MAX): Changed from original regexp: '/ {2,}\n/' because I don't
+		# NOTE(max): Changed from original regexp: '/ {2,}\n/' because I don't
 		#            want to have to put two or more spaces at the end of a line
 		#            in order to get word wrap on the next (seriuosly, wtf?).
 		#            Also added wordwrap call to avoid having to manually break
 		#            all of my lines (like I was doing...).
-		return preg_replace_callback('/\n/', 
-			array(&$this, '_doHardBreaks_callback'), wordwrap($text, 70));
+		#
+		#            new regex was: '/\n/'
+		#
+		# NOTE(max): Reverting some of this as we're not wrapping HTML properly
+		#            and we need to do this at the very end...
+		return preg_replace_callback('/ {2,}\n/', 
+			array(&$this, '_doHardBreaks_callback'), $text);#$this->myWordwrap($text, 70));
 
 	}
 	function _doHardBreaks_callback($matches) {
 		return $this->hashPart("<br$this->empty_element_suffix\n");
 	}
-
 
 	function doAnchors($text) {
 	#
