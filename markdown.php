@@ -361,18 +361,32 @@ class Markdown_Parser {
 	# so far there haven't been any cases where it doesn't work.
 	var $wrapStartTags = array(
 		"p", #<p>
-		"l", #<li>
-		"h", #<h*>
-		"b", #<blockquote> and <br />; OK as Markdown doesn't use <b>.
+		"li", #<li>
+		"h1", "h2", "h3", "h4", "h5", "h6", #<h*>
+		"blockquote", #<blockquote>
+		"br",
 	 	);
+
+	# We don't auto-wrap text when we're in these tags.
+	var $noWrapTags = array(
+		"pre",
+		"code"
+		);
+
+	# Start auto-wrapping after we find these.
+	var $noWrapCloseTags = array(
+		"/pre",
+		"/code"
+		);	
 
 	# Gratefully fround at http://www.php.net/manual/en/function.wordwrap.php;
 	# submitted from a user.
 	function htmlWrap($text, $maxLength=70, $char='<br />') {
     	$count = 0;
     	$newStr = '';
-    	$openTag = false;
-    	$openEscape = false;
+    	$openTag = false; # we're inside a HTML tag like <p>
+    	$openEscape = false; # we're inside an escaped HTML, like &theta;
+    	$doWrap = true; # we set this to false when we're in <pre> or <code>
     	$lenstr = strlen($text);
     	$lastspace = 0;
     	$lineidx = 0;
@@ -382,19 +396,34 @@ class Markdown_Parser {
 
     		# Deal with tag opens and closes (builtin).
     		if($text{$i} == '<'){
-    			// echo "\n[[open tag:" . substr($text, $i, 2) . "]]\n";
-    			// flush();
     			$openTag = true;
+    			$closeTagPos = strpos($text, ">", $i);
+    			$curTag = substr($text, $i + 1, $closeTagPos - $i - 1);
+
     			# MAX: Making it smart because <p> tags, e.g., mean that we get
     			#      to start counting from 0!
-    			if (in_array($text[$i + 1], $this->wrapStartTags)) {
+    			if (in_array($curTag, $this->wrapStartTags)) {
     				$count = 0;
     			}
+
+    			# start a not wrapping segment
+    			if (in_array($curTag, $this->noWrapTags)) {
+    				$doWrap = false;
+    				$count = 0;
+    			}
+
+    			# end a not wrapping segment. to do this right we need an html
+    			# parser (or at least a stack of pre-formatted blocks we're in,
+    			# but whatever)
+    			if (in_array($curTag, $this->noWrapCloseTags)) {
+    				$doWrap = true;
+    				$count = 0;
+    			}
+
     			continue;
     		}
+
     		if(($openTag) && ($text{$i} == '>')){
-    			// echo "\n[[close tag: >]]\n";
-    			// flush();
     			$openTag = false;
     			continue;
     		}
@@ -411,8 +440,7 @@ class Markdown_Parser {
     			continue;
     		}    		
 
-
-    		if((!$openTag) && (!$openEscape)) {
+    		if((!$openTag) && (!$openEscape) && $doWrap) {
     			if($text{$i} == ' '){
     				if ($count == 0) {
     					// Rip off the space we just added; don't start lines

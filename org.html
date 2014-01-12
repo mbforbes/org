@@ -104,7 +104,41 @@
 		}
 
 		closedir($dirFH);
+
+		# Do our own sorting if all begin with "#_" (a number then an
+		# underscore), because annoyingly 10 comes before 2 otherwise.
+		$allNums = true;
+		foreach ($dirlist as $idx => $dirEntry) {
+			# strpos would return false if it doesn't exist, or 0 if it's first,
+			# and both are bad, so we can use ==. We'd use === for checking
+			# strictly for false.
+			$usPos = strpos($dirEntry, "_");
+			if ($usPos == 0 || !is_numeric(substr($dirEntry, 0, $usPos))) {
+				$allNums = false;
+				break;
+			}
+		}
+		if ($allNums) {
+			uasort($dirlist, 'usNumCmpFn');
+		}
+
+		# Give back the list.
 		return $dirlist;
+	}
+
+	# call on strings of the format "#_*", that is, a number, followed by an
+	# underscore, followed by some text. It will sort based on the numbers.
+	function usNumCmpFn($a, $b) {
+		# get nums
+		$na = intval(substr($a, 0, strpos($a, "_")));
+		$nb = intval(substr($b, 0, strpos($b, "_")));
+
+		# compare
+		if ($na == $nb) {
+			return 0;
+		} else {
+			return ($na < $nb) ? -1 : 1;
+		}
 	}
 
 	function space() {
