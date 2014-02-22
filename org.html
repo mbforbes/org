@@ -1,5 +1,6 @@
 <?php
-	# settings (globals)
+	# Settings (globals)
+	# ------------------
 	include_once "markdown.php";
 	$orgDir = '../Google Drive/org/';
 	$prjDir = $orgDir.'projects/';
@@ -31,10 +32,17 @@
 
 	chdir("/Users/max/Sites/");
 
+	# Header
+	# ------
+
 	# TODO(max) If loading resource in future, won't want to always write
 	# html things. Perhaps best to replace echo's with some queueing function
 	# that writes at the end, or at least conditionall write.
 	display_header($prjName, $resName);
+
+	
+	# Left sidebar
+	# ------------
 
 	# Display project list
 	# --------------------
@@ -45,15 +53,26 @@
 	foreach ($project_list as $project) {
 		echo(prjLink('prj', $project));
 	}
-	echo "</ul>\n";
-	echo "<h2>Someday</h2>\n";
-	echo "<ul>\n";
-	$someday_list = getFiles($somedayDir);
-	foreach ($someday_list as $someday) {
-		echo(prjLink('smd', $someday));
+
+	# Display someday list (if it exists)
+	# -----------------------------------
+	$someday_list = getFiles($somedayDir);	
+	if ($someday_list) {
+		echo "</ul>\n";
+		echo "<h2>Someday</h2>\n";
+		echo "<ul>\n";
+		foreach ($someday_list as $someday) {
+			echo(prjLink('smd', $someday));
+		}
+		echo "</ul>\n";
 	}
-	echo "</ul>\n";		
+
+	# End of left sidebar
 	echo "</div>\n";
+
+
+	# Main screen area (on right)
+	# ---------------------------
 
 	# Display resource or project or someday
 	echo "<div class='col-xs-9'>\n";
