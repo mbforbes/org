@@ -1,7 +1,11 @@
 <?php
 	# settings (globals)
 	include_once "markdown.php";
-	$prjDir = '../Google Drive/org/projects';
+	$orgDir = '../Google Drive/org/';
+	$prjDir = $orgDir.'projects/';
+	$somedayDir = $orgDir.'someday/';
+	$activeDir = '';
+	$activeSection = '';
 	$idxFilename = "i.md";
 	$ignoreFiles = array(".", "..", ".DS_Store", $idxFilename);
 	$supportedResources = array("txt", "md");
@@ -13,6 +17,16 @@
 
 	# vars
 	$prjName = $_GET["prj"];
+	if ($prjName) {
+		$activeDir = $prjDir;
+		$activeSection = 'prj';
+	} else {
+		# someday
+		$prjName = $_GET["smd"];
+		$activeDir = $somedayDir;
+		$activeSection = 'smd';
+	}
+	$activeDir .= $prjName;
 	$resName = $_GET["res"];
 
 	chdir("/Users/max/Sites/");
@@ -29,16 +43,23 @@
 	echo "<ul>\n";
 	$project_list = getFiles($prjDir);
 	foreach ($project_list as $project) {
-		echo(prjLink($project));
+		echo(prjLink('prj', $project));
 	}
-	echo "</ul>\n";	
+	echo "</ul>\n";
+	echo "<h2>Someday</h2>\n";
+	echo "<ul>\n";
+	$someday_list = getFiles($somedayDir);
+	foreach ($someday_list as $someday) {
+		echo(prjLink('smd', $someday));
+	}
+	echo "</ul>\n";		
 	echo "</div>\n";
 
-	# Display resource or project
+	# Display resource or project or someday
 	echo "<div class='col-xs-9'>\n";
 	if ($prjName) {
-		$thisPrjDir = "$prjDir/$prjName";
 		echo "<div class='jumbotron'><h1>${prjName}</h1>";
+
 		# Display resource in heder if it exists.
 		if ($resName) {
 			echo "<subtitle>${resName}</subtitle>\n";
@@ -48,24 +69,24 @@
 		if ($resName) {
 			# Display resource (alpha)
 			# ------------------------
-			$res_file = file_get_contents("$thisPrjDir/$resName");
+			$res_file = file_get_contents("$activeDir/$resName");
 			$res_file_html = Markdown($res_file);
 			echo $res_file_html;
 		} else {
 			# Display single project
 			# ----------------------
 			# idx file
-			$idx_file = file_get_contents("$thisPrjDir/$idxFilename");
+			$idx_file = file_get_contents("$activeDir/$idxFilename");
 			$idx_file_html = Markdown($idx_file);
 			echo($idx_file_html);
 
 			# resources?
-			$other_files = getFiles($thisPrjDir);
+			$other_files = getFiles($activeDir);
 			if ($other_files) {
 				echo "<h2>resources</h2>\n";
 				echo "<ul>\n";
 				foreach ($other_files as $resource) {
-					echo(resourceLink($prjName, $resource));
+					echo(resourceLink($activeSection, $activeDir, $prjName, $resource));
 				}
 				echo "</ul>\n";			
 			}
@@ -145,17 +166,19 @@
 		return "<br /><br />";
 	}
 
-	function prjLink($prjName) {
-		return "<li><a href=\"?prj=${prjName}\">${prjName}</a></li>";
+	function prjLink($short, $prjName) {
+		return "<li><a href=\"?${short}=${prjName}\">${prjName}</a></li>";
 	}
 
-	function resourceLink($prjName, $resourceName) {
+	# $activeSection is either 'prj' or 'smd' for projects/ or someday/,
+	# respectively.
+	function resourceLink($activeSection, $activeDir, $prjName, $resourceName) {
 		$pathInfo = pathinfo($resourceName);
 		if (array_key_exists('extension', $pathInfo) &&
 			in_array($pathInfo['extension'], $GLOBALS["supportedResources"])) {
-			return "<li><a href=\"?prj=${prjName}&res=${resourceName}\">${resourceName}</a></li>";
+			return "<li><a href=\"?${activeSection}=${prjName}&res=${resourceName}\">${resourceName}</a></li>";
 		} else {
-			return "<li><a href=\"${GLOBALS["prjDir"]}/${prjName}/${resourceName}\">${resourceName}</a></li>";
+			return "<li><a href=\"${activeDir}/${resourceName}\">${resourceName}</a></li>";
 		}
 	}
 ?>

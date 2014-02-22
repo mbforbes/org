@@ -380,7 +380,7 @@ class Markdown_Parser {
 		);	
 
 	# Gratefully fround at http://www.php.net/manual/en/function.wordwrap.php;
-	# submitted from a user.
+	# submitted from a user. (And henceforth completely rewritten...)
 	function htmlWrap($text, $maxLength=70, $char='<br />') {
     	$count = 0;
     	$newStr = '';
@@ -430,16 +430,22 @@ class Markdown_Parser {
 
     		# Deal with escape (e.g. &theta;, &amp;, etc.). opens and closes.
     		# I added this.
-    		if($text{$i} == '&') {
-    			$openEscape = true;
-    			continue;
-    		}
-    		if(($openEscape) && ($text{$i} == ';')) {
-    			$openEscape = false;
-    			$count++; # They do take up 1 character width.
-    			continue;
-    		}    		
+    		if (!$openTag) {
+    			# Start escape
+				if($text{$i} == '&') {
+					$openEscape = true;
+					continue;
+				}
 
+				# End escape
+				if(($openEscape) && ($text{$i} == ';')) {
+					$openEscape = false;
+					$count++; # They do take up 1 character width.
+					continue;
+				} 
+			}
+
+			# "Normal" case
     		if((!$openTag) && (!$openEscape) && $doWrap) {
     			if($text{$i} == ' '){
     				if ($count == 0) {
