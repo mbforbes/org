@@ -12,7 +12,7 @@ Write up your projects and resources in Markdown, host and view locally on a Mac
 
 - Don't make the PHP error reporting any stricter, because it's annoying as hell and unnecessary.
 
-- [Change](http://www.phpied.com/installing-php-and-apache-on-mac-osx-that-was-pretty-easy/) the document root in TWO PLACES to something like /Users/<uname> (/etc/apache2/httpd.conf).
+- [Change](http://www.phpied.com/installing-php-and-apache-on-mac-osx-that-was-pretty-easy/) the document root in TWO PLACES to something like /Users/&lt;uname&gt; (/etc/apache2/httpd.conf).
 
 - [Allow](http://forums.cpanel.net/f5/allow-php-htm-html-pages-89345.html) PHP in HTML pages (/etc/apache2/httpd.conf).
 
