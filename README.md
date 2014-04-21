@@ -26,6 +26,9 @@ You'll want to edit the following variables in `org.html` (this should be config
 ## How you should place files
 It assumes under your `$orgDir` you have two directories, `projects` and `someday`. It then assumes that you have one folder per project (project folders go in either of these directories). Then, it expects you have a file of the name `$idxFilename`, which it will parse/render as Markdown. At the bottom of each index file, it will generate a 'resources' section with links to all other files that you put in that project directory.
 
+## Future work
+I don't like being stuck in PHP, and the Markdown parsing isn't going anywhere (I want code highlighting!), so I'll likely rewrite this into a Node project in the near future. Then it will be cross-platform, too!
+
 ## Thanks to
 - [PHP Markdown](https://github.com/michelf/php-markdown) (I modified it slightly to do word wrapping and improve bulleted spacing)
 - [Bootstrap](https://github.com/twbs/bootstrap)
