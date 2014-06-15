@@ -4,7 +4,10 @@
 	include_once "markdown.php";
 	$orgDir = '../GoogleDrive/org/';
 	$prjDir = $orgDir.'projects/';
+	$continuousDir = $orgDir.'continuous/';
 	$somedayDir = $orgDir.'someday/';
+	$finishedDir = $orgDir.'finished/';
+	$prjName = '';
 	$activeDir = '';
 	$activeSection = '';
 	$idxFilename = "i.md";
@@ -16,17 +19,32 @@
 	#$htmlHeaderFilename = "_header.html";
 	$htmlFooterFilename = "_footer.html";
 
-	# vars
-	$prjName = $_GET["prj"];
-	if ($prjName) {
+	# set vars
+	if ($_GET["prj"]) {
+		# prj?
+		$prjName = $_GET["prj"];
 		$activeDir = $prjDir;
 		$activeSection = 'prj';
-	} else {
-		# someday
+	} else if ($_GET["smd"]) {
+		# someday?
 		$prjName = $_GET["smd"];
 		$activeDir = $somedayDir;
 		$activeSection = 'smd';
+	} else if ($_GET["cnt"]) {
+		# continuous?
+		$prjName = $_GET["cnt"];
+		$activeDir = $continuousDir;
+		$activeSection = 'cnt';
+	} else if ($_GET["fin"]) {
+		# continuous?
+		$prjName = $_GET["fin"];
+		$activeDir = $finishedDir;
+		$activeSection = 'fin';
 	}
+
+
+
+	# final settings
 	$activeDir .= $prjName;
 	$resName = $_GET["res"];
 
@@ -40,36 +58,15 @@
 	# that writes at the end, or at least conditionall write.
 	display_header($prjName, $resName);
 
-	
+
 	# Left sidebar
 	# ------------
-
-	# Display project list
-	# --------------------
 	echo "<div class='col-xs-3'>\n";
-	echo "<h2>Projects</h2>\n";
-	echo "<ul>\n";
-	$project_list = getFiles($prjDir);
-	foreach ($project_list as $project) {
-		echo(prjLink('prj', $project));
-	}
-
-	# Display someday list (if it exists)
-	# -----------------------------------
-	$someday_list = getFiles($somedayDir);	
-	if ($someday_list) {
-		echo "</ul>\n";
-		echo "<h2>Someday</h2>\n";
-		echo "<ul>\n";
-		foreach ($someday_list as $someday) {
-			echo(prjLink('smd', $someday));
-		}
-		echo "</ul>\n";
-	}
-
-	# End of left sidebar
+	display_sidebar_section($prjDir, 'prj', 'Projects');
+	display_sidebar_section($continuousDir, 'cnt', 'Continuous');
+	display_sidebar_section($somedayDir, 'smd', 'Someday');
+	display_sidebar_section($finishedDir, 'fin', 'Finished');
 	echo "</div>\n";
-
 
 	# Main screen area (on right)
 	# ---------------------------
@@ -84,7 +81,7 @@
 			echo "<subtitle>${resName}</subtitle>\n";
 		}
 		echo "</div>";
-		
+
 		if ($resName) {
 			# Display resource (alpha)
 			# ------------------------
@@ -107,7 +104,7 @@
 				foreach ($other_files as $resource) {
 					echo(resourceLink($activeSection, $activeDir, $prjName, $resource));
 				}
-				echo "</ul>\n";			
+				echo "</ul>\n";
 			}
 		}
 	}
@@ -131,6 +128,18 @@
 
 	function display_html($filename) {
 		echo file_get_contents("$filename");
+	}
+
+	function display_sidebar_section($dir, $short, $display) {
+		$prj_list = getFiles($dir);
+		if ($prj_list) {
+			echo "<h2>${display}</h2>\n";
+			echo "<ul>\n";
+			foreach ($prj_list as $prj) {
+				echo(prjLink($short, $prj));
+			}
+			echo "</ul>\n";
+		}
 	}
 
 	function getFiles($dirname) {
